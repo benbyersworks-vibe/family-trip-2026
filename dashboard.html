@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Price Dashboard ✈️</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 60vh;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            width: 30%;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .stat-card p {
+            margin: 5px 0 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0277bd;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Flight Price History (PDX ➡️ LHR)</h1>
+
+        <div id="stats" class="stats" style="display: none;">
+            <div class="stat-card">
+                <h3>Current Lowest Price</h3>
+                <p id="min-price">-</p>
+            </div>
+            <div class="stat-card">
+                <h3>Average Price</h3>
+                <p id="avg-price">-</p>
+            </div>
+            <div class="stat-card">
+                <h3>Data Points</h3>
+                <p id="total-points">-</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="priceChart"></canvas>
+        </div>
+        <div id="loading" class="loading">Loading flight data...</div>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    document.getElementById('loading').innerText = "No data found in Sheet.";
+                    return;
+                }
+
+                processData(data);
+            } catch (error) {
+                console.error("Error loading data:", error);
+                document.getElementById('loading').innerText = "Error loading data. Check console.";
+            }
+        }
+
+        function processData(rows) {
+            // Helper to parse price string ("$500", "400 EUR") -> Number
+            const parsePrice = (str) => {
+                if (!str) return null;
+                const num = parseFloat(str.replace(/[^0-9.]/g, ''));
+                return isNaN(num) ? null : num;
+            };
+
+            const points = rows.map(r => ({
+                x: new Date(r.timestamp),
+                y: parsePrice(r.priceStr),
+                source: r.source,
+                airline: r.airline,
+                isDirect: r.isDirect
+            })).filter(p => p.y !== null && !isNaN(p.x));
+
+            // Sort by time
+            points.sort((a, b) => a.x - b.x);
+
+            updateStats(points);
+            renderChart(points);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('stats').style.display = 'flex';
+        }
+
+        function updateStats(points) {
+            const prices = points.map(p => p.y);
+            const min = Math.min(...prices);
+            const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+
+            document.getElementById('min-price').innerText = '$' + min.toFixed(2);
+            document.getElementById('avg-price').innerText = '$' + avg.toFixed(2);
+            document.getElementById('total-points').innerText = points.length;
+        }
+
+        function renderChart(points) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+
+            // Separate data by Source (Amadeus vs SerpAPI) for different colors?
+            // Or just one line? Let's do a scatter plot with line for clarity.
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Flight Price ($)',
+                        data: points,
+                        borderColor: '#0277bd',
+                        backgroundColor: 'rgba(2, 119, 189, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.1 // Slight curve
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: { day: 'MMM D' }
+                            },
+                            title: { display: true, text: 'Date Checked' }
+                        },
+                        y: {
+                            beginAtZero: false, // Focus on price range
+                            title: { display: true, text: 'Price (USD)' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const p = context.raw;
+                                    return `${p.airline} (${p.source}): $${p.y}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>
