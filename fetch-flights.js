@@ -65,12 +65,15 @@ if (require.main === module) {
 
         console.log(`Testing query for ${dateStr}...`);
 
+        const ORIGIN = 'PDX';
+        const DEST = 'LHR';
+
         console.log("--- Amadeus ---");
-        const amadeusData = await fetchFlightsAmadeus('SFO', 'JFK', dateStr);
+        const amadeusData = await fetchFlightsAmadeus(ORIGIN, DEST, dateStr);
         console.log(`Amadeus Results: ${amadeusData ? amadeusData.length : 0} flights found.`);
 
         console.log("--- SerpAPI ---");
-        const serpData = await fetchFlightsSerpApi('SFO', 'JFK', dateStr);
+        const serpData = await fetchFlightsSerpApi(ORIGIN, DEST, dateStr);
         console.log(`SerpAPI Results: ${serpData ? serpData.length : 0} flights found.`);
     })();
 }
