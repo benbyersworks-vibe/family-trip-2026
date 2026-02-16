@@ -116,12 +116,16 @@ async function runPipeline() {
 
     // Configuration - Hardcoded for daily automation for now
     // Future: Read from config file or environment variables
-    const ORIGIN = 'SFO';
-    const DEST = 'JFK';
+    const ORIGIN = 'PDX';
+    const DEST = 'LHR';
 
     // Date: 2 months from now
     const date = new Date();
     date.setMonth(date.getMonth() + 2);
+    // Ideally user wants summer 2026? 
+    // For now we keep "2 months ahead" rolling logic, 
+    // or we can hardcode a specific date like '2026-06-01' if they want.
+    // Let's stick to dynamic rolling window for now unless specified.
     const DEPART_DATE = date.toISOString().split('T')[0];
 
     // Optional: Add Return Date logic for automation if desired
