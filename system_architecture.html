@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Trip 2026 - System Architecture</title>
+    <!-- Load Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background-color: #f4f6f8;
+        }
+
+        .mermaid {
+            margin: 20px auto;
+            max-width: 1000px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 20px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>System Architecture Diagram</h1>
+    <div class="hint">Right-click the diagram below and choose "Save image as..." to get your JPG/PNG.</div>
+
+    <div class="mermaid">
+        graph TD
+        %% Define Styles
+        classDef laptop fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+        classDef cloud fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+        classDef api fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+        classDef storage fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
+
+        subgraph Laptop ["💻 Your Laptop (Development)"]
+        direction TB
+        Files["Local Files<br />(server.js, index.js)"]
+        VSCode["VS Code / Antigravity"]
+        LocalGit["Git (Version Control)"]
+        Browser["Web Browser (UI)"]
+        end
+        class Laptop laptop
+
+        subgraph GitHubC ["☁️ The Cloud (Automation)"]
+        Repo["GitHub Repository<br />(Code Storage)"]
+        Actions["GitHub Actions<br />(Daily Robot 🤖)"]
+        end
+        class GitHubC cloud
+
+        subgraph APIs ["🌍 External APIs"]
+        Amadeus["Amadeus API"]
+        Serp["SerpAPI (Google Flights)"]
+        end
+        class APIs api
+
+        subgraph Data ["💾 Data Storage"]
+        Sheet[("Google Sheet<br />'Flight Data'")]
+        end
+        class Data storage
+
+        %% Connections
+        Browser -- "1. Views UI (localhost:3000)" --> Files
+        VSCode -- "2. Edits Code" --> Files
+        Files -- "3. Manual Test Run" --> Amadeus & Serp
+        Files -- "4. Saves Manual Data" --> Sheet
+
+        Files -- "5. Push Code" --> LocalGit
+        LocalGit -- "6. Sync Code" --> Repo
+
+        Actions -- "7. Pulls Code Daily" --> Repo
+        Actions -- "8. Runs Automated Check" --> Amadeus & Serp
+        Amadeus & Serp -- "9. Return Prices" --> Actions
+        Actions -- "10. Saves Daily Data" --> Sheet
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+
+</html>

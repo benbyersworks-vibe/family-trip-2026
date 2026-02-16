@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Price Dashboard ✈️</title>
+    <title>Flight Price Dashboard v2 ✈️</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
@@ -75,7 +75,7 @@
 <body>
 
     <div class="container">
-        <h1>Flight Price History (PDX ➡️ LHR)</h1>
+        <h1>Flight Price History (PDX ➡️ LHR) - v2</h1>
 
         <div id="stats" class="stats" style="display: none;">
             <div class="stat-card">
@@ -87,8 +87,8 @@
                 <p id="avg-price">-</p>
             </div>
             <div class="stat-card">
-                <h3>Data Points</h3>
-                <p id="total-points">-</p>
+                <h3>Direct Flights</h3>
+                <p id="direct-count">-</p>
             </div>
         </div>
 
@@ -101,7 +101,8 @@
     <script>
         async function loadData() {
             try {
-                const response = await fetch('/api/history');
+                // Add timestamp to bypass cache
+                const response = await fetch('/api/history?t=' + new Date().getTime());
                 const data = await response.json();
 
                 if (data.length === 0) {
@@ -109,6 +110,8 @@
                     return;
                 }
 
+                // Debug log
+                console.log("Raw API Data:", data);
                 processData(data);
             } catch (error) {
                 console.error("Error loading data:", error);
@@ -117,7 +120,6 @@
         }
 
         function processData(rows) {
-            // Helper to parse price string ("$500", "400 EUR") -> Number
             const parsePrice = (str) => {
                 if (!str) return null;
                 const num = parseFloat(str.replace(/[^0-9.]/g, ''));
@@ -129,10 +131,9 @@
                 y: parsePrice(r.priceStr),
                 source: r.source,
                 airline: r.airline,
-                isDirect: r.isDirect
+                isDirect: r.isDirect // "Yes" or "No"
             })).filter(p => p.y !== null && !isNaN(p.x));
 
-            // Sort by time
             points.sort((a, b) => a.x - b.x);
 
             updateStats(points);
@@ -145,17 +146,20 @@
             const prices = points.map(p => p.y);
             const min = Math.min(...prices);
             const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+            const directCount = points.filter(p => p.isDirect === 'Yes').length;
 
             document.getElementById('min-price').innerText = '$' + min.toFixed(2);
             document.getElementById('avg-price').innerText = '$' + avg.toFixed(2);
-            document.getElementById('total-points').innerText = points.length;
+            document.getElementById('direct-count').innerText = directCount;
         }
 
         function renderChart(points) {
             const ctx = document.getElementById('priceChart').getContext('2d');
 
-            // Separate data by Source (Amadeus vs SerpAPI) for different colors?
-            // Or just one line? Let's do a scatter plot with line for clarity.
+            // LOGIC FOR STARS
+            const pointColors = points.map(p => p.isDirect === 'Yes' ? '#2e7d32' : '#0277bd');
+            const pointStyles = points.map(p => p.isDirect === 'Yes' ? 'star' : 'circle');
+            const pointRadii = points.map(p => p.isDirect === 'Yes' ? 12 : 5);
 
             new Chart(ctx, {
                 type: 'line',
@@ -163,13 +167,16 @@
                     datasets: [{
                         label: 'Flight Price ($)',
                         data: points,
-                        borderColor: '#0277bd',
-                        backgroundColor: 'rgba(2, 119, 189, 0.1)',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        fill: true,
-                        tension: 0.1 // Slight curve
+                        borderColor: '#90caf9',
+                        borderWidth: 1,
+                        backgroundColor: pointColors,
+                        pointBackgroundColor: pointColors,
+                        pointBorderColor: pointColors,
+                        pointStyle: pointStyles,
+                        pointRadius: pointRadii,
+                        pointHoverRadius: 15,
+                        fill: false,
+                        tension: 0.1
                     }]
                 },
                 options: {
@@ -185,7 +192,7 @@
                             title: { display: true, text: 'Date Checked' }
                         },
                         y: {
-                            beginAtZero: false, // Focus on price range
+                            beginAtZero: false,
                             title: { display: true, text: 'Price (USD)' }
                         }
                     },
@@ -194,10 +201,12 @@
                             callbacks: {
                                 label: function (context) {
                                     const p = context.raw;
-                                    return `${p.airline} (${p.source}): $${p.y}`;
+                                    const directLabel = p.isDirect === 'Yes' ? ' (DIRECT 🌟)' : '';
+                                    return `${p.airline}: $${p.y}${directLabel}`;
                                 }
                             }
-                        }
+                        },
+                        legend: { display: false }
                     }
                 }
             });

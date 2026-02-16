@@ -72,4 +72,23 @@ async function clearSheet(spreadsheetId) {
     }
 }
 
-module.exports = { appendData, clearSheet, getSheetsClient };
+/**
+ * Fetches all data from the spreadsheet.
+ * @param {string} spreadsheetId
+ * @returns {Promise<Array<Array<string>>>}
+ */
+async function getSheetData(spreadsheetId) {
+    const sheets = await getSheetsClient();
+    try {
+        const res = await sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range: 'Sheet1!A:J', // Fetch columns A through J (Timestamp)
+        });
+        return res.data.values || [];
+    } catch (error) {
+        console.error('Error fetching sheet data:', error.message);
+        return [];
+    }
+}
+
+module.exports = { appendData, clearSheet, getSheetsClient, getSheetData };
