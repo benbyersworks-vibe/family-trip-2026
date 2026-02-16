@@ -1,0 +1,35 @@
+name: Daily Flight Check
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Flight Pipeline
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          AMADEUS_CLIENT_ID: ${{ secrets.AMADEUS_CLIENT_ID }}
+          AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          # For Google Auth, we'll need to create a credential file from a secret
+          # We'll assume you paste the content of credentials.json into a secret named GCP_CREDENTIALS
+        run: |
+          echo '${{ secrets.GCP_CREDENTIALS }}' > credentials.json
+          node index.js

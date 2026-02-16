@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Trip 2026: London & Edinburgh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-light: #f8fafc;
+            --text-dim: #94a3b8;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 20%);
+            color: var(--text-light);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 2rem;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .flight-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .route {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .route span {
+            color: var(--accent);
+        }
+
+        .plane-icon {
+            transform: rotate(90deg);
+            color: var(--text-dim);
+            font-size: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1rem;
+        }
+
+        .label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .value {
+            font-weight: 600;
+        }
+
+        .price-tag {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+            text-align: center;
+            margin-top: 1rem;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .price-sub {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        .agent-terminal {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--glass-border);
+            color: #10b981;
+            font-size: 0.85rem;
+            height: 150px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column-reverse;
+            /* New logs at bottom visually if we prepend, but usually append */
+        }
+
+        .log-entry {
+            return;
+            margin-bottom: 0.5rem;
+        }
+
+        .log-time {
+            color: var(--text-dim);
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Family Trip 2026: London & Edinburgh</h1>
+
+    <div class="dashboard-grid">
+        <!-- Flight Scout Agent Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span>✈️</span> Flight Scout
+                </div>
+                <div class="status-badge pulse">ACTIVE</div>
+            </div>
+
+            <div class="flight-info">
+                <div class="route">
+                    <span>PDX</span>
+                    <div class="plane-icon">✈</div>
+                    <span>LHR</span>
+                </div>
+
+                <div class="detail-row">
+                    <div>
+                        <div class="label">Target Range</div>
+                        <div class="value">June 1 - 15</div>
+                    </div>
+                    <div>
+                        <div class="label">Flexibility</div>
+                        <div class="value">+/- 3 Days</div>
+                    </div>
+                </div>
+
+                <div class="detail-row" style="flex-direction: column; gap: 0.5rem; align-items: flex-start;">
+                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="label">Outbound</span>
+                        <span class="value" id="outbound-detail">Checking...</span>
+                    </div>
+                    <div
+                        style="width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-dim);">
+                        <span id="outbound-flight"></span>
+                    </div>
+                </div>
+
+                <div class="detail-row" style="flex-direction: column; gap: 0.5rem; align-items: flex-start;">
+                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="label">Return</span>
+                        <span class="value" id="return-detail">Checking...</span>
+                    </div>
+                    <div
+                        style="width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-dim);">
+                        <span id="return-flight"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="price-tag" id="price-display">Let me check...</div>
+                    <div class="price-sub">Best Price Found</div>
+                </div>
+
+                <!-- Price History Chart Container -->
+                <div style="margin-top: 1.5rem; height: 150px;">
+                    <canvas id="priceHistoryChart"></canvas>
+                </div>
+
+                <div class="agent-terminal" id="agent-logs">
+                    <!-- Logs will appear here -->
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Flight Scout Configuration
+        const FlightScout = {
+            config: {
+                origin: 'PDX',
+                destination: 'LHR',
+                startDate: '2026-06-01', // Start of June
+                endDate: '2026-06-15',   // Mid June
+                passengers: {
+                    adults: 2,
+                    teens: 1, // 15 years old
+                    children: 0
+                },
+                constraints: {
+                    directOnly: true,
+                    airlines: ['British Airways'],
+                    flexibleDays: 3
+                },
+                baselineDays: 7
+            },
+
+            // Live Data Mode
+            // mockData removed
+
+
+            history: [],
+
+            init() {
+                this.loadHistory();
+                this.log('Initializing Flight Scout Agent...');
+                this.log(`Config: ${this.config.origin} -> ${this.config.destination}`);
+                this.log(`Passengers: ${this.config.passengers.adults} Adults, ${this.config.passengers.teens} Teen`);
+                this.log(`Target: ${this.config.startDate} to ${this.config.endDate}`);
+
+                setTimeout(() => {
+                    this.scan();
+                }, 1500);
+            },
+
+            loadHistory() {
+                const stored = localStorage.getItem('flightScoutHistory');
+                if (stored) {
+                    this.history = JSON.parse(stored);
+                    this.log(`Loaded ${this.history.length} historical records.`);
+                } else {
+                    this.seedDemoHistory();
+                }
+                this.renderChart();
+                // If we have history, check for today's price to update total immediately
+                if (this.history.length > 0) {
+                    const lastEntry = this.history[this.history.length - 1];
+                    // Verify if last entry is recent (optional, but good for demo)
+                    // For now, let's just use the mock data re-scan to drive the update
+                    // or we can trigger a total update if we want persistence to be instant.
+                }
+            },
+
+            seedDemoHistory() {
+                // Create 5 days of history for demo (Fallback/Init)
+                const today = new Date();
+                const baseTotal = 3200; // Approx baseline
+                for (let i = 5; i > 0; i--) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() - i);
+                    // Random variance around base price
+                    const variance = Math.floor(Math.random() * 200) - 100;
+                    const total = baseTotal + variance;
+                    this.history.push({
+                        date: date.toISOString().split('T')[0],
+                        price: total
+                    });
+                }
+                localStorage.setItem('flightScoutHistory', JSON.stringify(this.history));
+                this.log('Seeded demo history data.');
+            },
+
+            saveScan(price) {
+                const today = new Date().toISOString().split('T')[0];
+                // Check if we already have a scan for today to avoid duplicates in demo
+                if (this.history.length > 0 && this.history[this.history.length - 1].date === today) {
+                    // Update today's entry
+                    this.history[this.history.length - 1].price = price;
+                } else {
+                    this.history.push({ date: today, price: price });
+                }
+
+                // Keep only last 30 days
+                if (this.history.length > 30) this.history.shift();
+
+                localStorage.setItem('flightScoutHistory', JSON.stringify(this.history));
+                this.renderChart();
+                this.checkBaseline(price);
+
+                // Trigger Grand Total Update
+                updateTripTotal();
+            },
+
+            checkBaseline(currentPrice) {
+                if (this.history.length < 2) return;
+
+                const prices = this.history.map(h => h.price);
+                const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+
+                this.log(`7-Day Average Baseline: $${Math.round(avg)}`);
+
+                if (currentPrice < avg) {
+                    this.log('🔥 PRICE ALERT: Current price is below average!');
+                    document.getElementById('price-display').style.color = 'var(--success)';
+                }
+            },
+
+            async scan() {
+                this.log('Initializing Live Sky Scan (SerpAPI)...');
+                const badge = document.querySelector('.card-header .status-badge');
+                if (badge) {
+                    badge.textContent = 'SCANNING...';
+                    badge.classList.add('pulse');
+                    badge.style.background = 'rgba(234, 179, 8, 0.2)'; // Yellow
+                    badge.style.color = '#facc15';
+                }
+
+                const API_KEY = '038ee6b4459e2ffc3dbc5fb9baa0279adc02c97c9817aace98d85ed09a486610';
+
+                try {
+                    // 1. Construct API URL
+                    const params = new URLSearchParams({
+                        engine: 'google_flights',
+                        departure_id: this.config.origin,
+                        arrival_id: this.config.destination,
+                        outbound_date: this.config.startDate,
+                        return_date: this.config.endDate,
+                        currency: 'USD',
+                        hl: 'en',
+                        gl: 'us',
+                        adults: this.config.passengers.adults,
+                        children: this.config.passengers.teens,
+                        stops: 1, // 1 = Nonstop only
+                        api_key: API_KEY
+                    });
+
+                    // Usage of CORS Proxy
+                    const corsProxy = 'https://corsproxy.io/?';
+                    const targetUrl = encodeURIComponent(`https://serpapi.com/search.json?${params}`);
+
+                    this.log(`Pinging Global Flight Network (${this.config.origin} -> ${this.config.destination})...`);
+                    const response = await fetch(`${corsProxy}${targetUrl}`);
+
+                    if (!response.ok) throw new Error(`Satellite Link Failed: ${response.status}`);
+
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+
+                    this.processResults(data);
+
+                } catch (error) {
+                    this.log(`❌ SCAN FAILED: ${error.message}`);
+                    if (badge) {
+                        badge.textContent = 'OFFLINE';
+                        badge.classList.remove('pulse');
+                        badge.style.background = 'rgba(239, 68, 68, 0.2)';
+                    }
+                }
+            },
+
+            processResults(data) {
+                // Filter for direct flights only (just in case API sends others)
+                let bestFlights = data.best_flights || data.other_flights || [];
+
+                // Client-side Strict Filter for Direct flights
+                // A direct flight means the outbound leg has 1 segment and return leg has 1 segment (if RT)
+                // However, 'best_flights' returns an array of flights (segments).
+                // We need to check if the result *has* layovers.
+                // SerpAPI usually creates a 'layovers' array if there are stops.
+
+                // Let's filter:
+                bestFlights = bestFlights.filter(flight => {
+                    // Check if any part of the flight has layovers
+                    if (flight.layovers) return false;
+                    // Also check leg count? 
+                    // If it's a round trip, we expect 'flights' array to have 2 items (Out + Ret) for Direct.
+                    // If it has more, it usually means connections.
+                    if (flight.flights && flight.flights.length > 2) return false;
+                    return true;
+                });
+
+                if (bestFlights.length === 0) {
+                    this.log('No DIRECT flights found. Try different dates.');
+                    return;
+                }
+
+                const best = bestFlights[0];
+                const price = best.price || 0;
+                const legs = best.flights || [];
+
+                // 1. Group segments into Outbound (to LHR) and Return (to PDX)
+                const outboundLegs = [];
+                const returnLegs = [];
+                let direction = 'outbound'; // start filling outbound
+
+                for (const leg of legs) {
+                    if (direction === 'outbound') {
+                        outboundLegs.push(leg);
+                        // If this leg arrives at Destination, switch to return for next legs
+                        if (leg.arrival_airport.id === this.config.destination) {
+                            direction = 'return';
+                        }
+                    } else {
+                        returnLegs.push(leg);
+                    }
+                }
+
+                // 2. Helper to extract Journey Info from a list of legs
+                const getJourneyInfo = (journeyLegs) => {
+                    if (journeyLegs.length === 0) return { airline: 'N/A', flightNo: '', time: 'TBD', duration: '?', stops: 0 };
+
+                    const first = journeyLegs[0];
+                    const last = journeyLegs[journeyLegs.length - 1];
+                    const airline = first.airline; // Use operating carrier of first leg
+                    const flightNo = first.flight_number;
+                    const time = first.departure_airport.time;
+
+                    // Total Duration: Sum of leg durations + layovers? 
+                    // SerpAPI unfortunately doesn't always sum it up nicely in the legs array.
+                    // But usually 'best_flights' entry has `total_duration` which is creating confusion if we split it.
+                    // Approximation: Sum of (leg.duration). 
+                    // Note: This misses layover times! 
+                    // Better approach: If we assume the user just wants to see the "Longest" leg's duration or similar?
+                    // No, let's sum leg durations and add a "Approx" label, or just show start/end times if available.
+
+                    // Actually, let's calculate rough duration if possible or just show leg sum + "flight time"
+                    // Real flight duration = (Arrival - Departure), but we only have string times usually.
+
+                    const flightMinutes = journeyLegs.reduce((sum, leg) => sum + (leg.duration || 0), 0);
+                    const hours = Math.floor(flightMinutes / 60);
+                    const mins = flightMinutes % 60;
+
+                    const stopCount = journeyLegs.length - 1;
+                    const stopText = stopCount > 0 ? `, ${stopCount} Stop(s)` : 'Direct';
+
+                    return {
+                        airline,
+                        flightNo,
+                        time,
+                        duration: `${hours}h ${mins}m (Air)`, // Explicitly say Air time to allow for layover discrepancy
+                        stops: stopText
+                    };
+                };
+
+                const outInfo = getJourneyInfo(outboundLegs);
+                const retInfo = getJourneyInfo(returnLegs);
+
+                this.log(`Trace Complete! Found option: $${price}`);
+
+                // Update UI
+                // Outbound
+                document.getElementById('outbound-detail').textContent = this.config.startDate;
+                document.getElementById('outbound-flight').innerHTML = `
+                    <div>${outInfo.airline} ${outInfo.flightNo}</div>
+                    <div style="font-size: 0.85em; opacity: 0.8;">${outInfo.time} • ${outInfo.duration}</div>
+                    <div style="font-size: 0.75em; color: var(--secondary);">${outInfo.stops}</div>
+                `;
+
+                // Return
+                document.getElementById('return-detail').textContent = this.config.endDate;
+                document.getElementById('return-flight').innerHTML = `
+                    <div>${retInfo.airline} ${retInfo.flightNo}</div>
+                    <div style="font-size: 0.85em; opacity: 0.8;">${retInfo.time} • ${retInfo.duration}</div>
+                    <div style="font-size: 0.75em; color: var(--secondary);">${retInfo.stops}</div>
+                `;
+
+                this.updateUI(price);
+
+                // Update Badge
+                const badge = document.querySelector('.card-header .status-badge');
+                if (badge) {
+                    badge.textContent = 'LIVE DATA';
+                    badge.classList.remove('pulse');
+                    badge.style.background = 'rgba(59, 130, 246, 0.2)';
+                    badge.style.color = '#60a5fa';
+                }
+            },
+
+            updateUI(total) {
+                const priceDisplay = document.getElementById('price-display');
+                const priceSub = document.querySelector('.price-sub');
+
+                // Animate price count up
+                let current = 0;
+                const increment = Math.ceil(total / 50);
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= total) {
+                        current = total;
+                        clearInterval(timer);
+                    }
+                    priceDisplay.textContent = `$${current}`;
+                }, 20);
+
+                priceSub.textContent = `Total for ${this.config.passengers.adults + this.config.passengers.teens} Passengers`;
+                this.log(`Price tracking active: $${total}`);
+                this.saveScan(total);
+            },
+
+            log(message) {
+                const terminal = document.getElementById('agent-logs'); // Shared terminal
+                if (!terminal) return;
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+
+                const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                entry.innerHTML = `<span class="log-time">[${time}]</span> [Flight] ${message}`; // Added [Flight] tag
+
+                terminal.insertBefore(entry, terminal.firstChild);
+            },
+
+            renderChart() {
+                const ctx = document.getElementById('priceHistoryChart');
+                if (!ctx) return;
+
+                // Destroy previous chart if exists
+                if (window.myPriceChart) window.myPriceChart.destroy();
+
+                const labels = this.history.map(h => h.date);
+                const data = this.history.map(h => h.price);
+
+                window.myPriceChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Trip Cost ($)',
+                            data: data,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } }, // Simplified
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            },
+
+            // Helper to get current total for global estimator
+            // Helper to get current total for global estimator
+            getCurrentTotal() {
+                if (this.history.length > 0) {
+                    return this.history[this.history.length - 1].price;
+                }
+                return 0;
+            }
+        };
+
+        // Global Trip Total Estimator
+        // Global Trip Total Estimator
+        function updateTripTotal() {
+            const flightTotal = FlightScout.getCurrentTotal();
+
+            // Only show if we have data
+            if (flightTotal > 0) {
+                const header = document.querySelector('h1');
+                // Check if subtitle already exists
+                let sub = document.getElementById('trip-total-subtitle');
+                if (!sub) {
+                    sub = document.createElement('div');
+                    sub.id = 'trip-total-subtitle';
+                    sub.style.fontSize = '1.2rem';
+                    sub.style.fontWeight = '400';
+                    sub.style.marginTop = '0.5rem';
+                    sub.style.color = 'var(--success)';
+                    sub.style.opacity = '0';
+                    sub.style.animation = 'fadeIn 1s forwards';
+                    header.after(sub);
+                }
+
+                sub.textContent = `Est. Flight Total: $${flightTotal.toLocaleString()}`;
+            }
+        }
+
+        // Add a global FadeIn style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        `;
+        document.head.appendChild(style);
+
+        // Start agents
+        document.addEventListener('DOMContentLoaded', () => {
+            FlightScout.init();
+            // StayScout removed
+        });
+
+    </script>
+</body>

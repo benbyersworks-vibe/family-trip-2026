@@ -1,0 +1,18 @@
+{
+  "name": "family-trip-2026-data-pipeline",
+  "version": "1.0.0",
+  "description": "Backend scripts to fetch flight data and upload reports to Google Drive.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "amadeus": "^11.0.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.0",
+    "express": "^5.2.1",
+    "googleapis": "^128.0.0"
+  },
+  "author": "Antigravity",
+  "license": "ISC"
+}
